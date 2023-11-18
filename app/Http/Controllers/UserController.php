@@ -15,7 +15,8 @@ class UserController extends Controller
     {
         //
         $users = User::all();
-        return view("users.index", compact("users"));
+        // return view("users.index", compact("users"));
+        return view("users.index", ["users"=> $users]);
     }
 
     /**
@@ -36,33 +37,36 @@ class UserController extends Controller
     {
         //
 
-        $request->validate([
-
-            "name" => "required",
-            "email" => "required|email",
-            "password" => "required|min:5",
-            "roles" => "required|array",
-
-
-
-        ]);
-
-        $user = User::all();
+        
+        // $request->validate([
+            
+        //     "name" => "required",
+        //     "email" => "required|email",
+        //     "password" => "required|min:5",
+        //     "roles" => "required|array",
+            
+            
+            
+        // ]);
+        
+        // $user = User::all();
         //  $role = Role::all();
-
+        
+        // dd($request);
+        
         $user = User::create([
-
+            
             "name" => $request->name,
             "email" => $request->email,
-            "password" => bcrypt($request->password),
-
-
+            "profile" => $request->profile,
+            
+            
         ]);
+        // dd($user);
+        $user->roles()->attach($request->input("roles")); //form input wala roles h ye
 
-        $user->role()->attach($request->input("roles")); //form input wala roles h ye
-
-        return redirect()->route("users.index")->with("success", "USER ADDED SUCCCESSFULLY");
-
+       
+        return back()->withSuccess('Product is Created Successfully');
 
     }
 
@@ -80,13 +84,13 @@ class UserController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(User $user)
+    public function edit(User $user , $id)
     {
         //
-        $role = Role::all();
-        $user = User::all();
+        $role = Role::find($id);
+        $user = User::find($id);
 
-        return view("users.show", compact("user", "role"));
+        return view("users.edit", compact("user", "role"));
     }
 
     /**
@@ -94,29 +98,20 @@ class UserController extends Controller
      */
     public function update(Request $request, User $user)
     {
-        //
-
-        $request->validate([
-
-            "name" => "required",
-            "email" => "required|email"  . $user->id,
-            "password" => "required|min:5",
-            "roles" => "required|array",
 
 
-
+        $user->update([
+            "name" => $request->name,
+            "email" => $request->email,
+            "profile" => $request->profile,
         ]);
 
-        dd($request);
 
-        //    $user = User::all();
-
-        // User::($request->all());
-
-        // return redirect()->route("users.index")->with("success","USER ADDED SUCCCESSFULLY");
-
+        $user->roles()->sync($request->input("roles")); //form input wala roles h ye
+        
+        // dd($user);
        
-
+        return back()->withSuccess('Product is Updated Successfully');
 
     }
 
